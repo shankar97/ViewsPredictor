@@ -16,7 +16,7 @@ from sklearn import tree
 ## MLP implmented using 1000 layers
 # pdb.set_trace()
 # dataset = numpy.loadtxt("download (14).csv", delimiter=",",skiprows=1)
-dataset = pd.read_csv("download (14).csv")
+dataset = pd.read_csv("dataset/download (14).csv")
 # print dataset.describe()
 
 X = dataset.drop("LikedOrDisliked",axis = 1)
