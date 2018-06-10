@@ -10,18 +10,27 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
+import graphviz
 
 
 
-## MLP implmented using 1000 layers
+
 # pdb.set_trace()
 # dataset = numpy.loadtxt("download (14).csv", delimiter=",",skiprows=1)
-dataset = pd.read_csv("dataset/download (14).csv")
+dataset = pd.read_csv("dataset/download (18).csv")
+dataset = dataset.drop("DislikeCount",axis=1)
+dataset = dataset.drop("DislikeCountRounded",axis=1)
+dataset = dataset.drop("LikeDislikeRatio",axis=1)
 # print dataset.describe()
+
+df2 = dataset.columns.get_values()
+
+df2 = df2.tolist()
 
 X = dataset.drop("LikedOrDisliked",axis = 1)
 Y = dataset["LikedOrDisliked"]
 
+## MLP implmented using 100 layers
 # X_train, X_test, y_train, y_test = train_test_split(X, Y)
 # # pdb.set_trace()
 # scaler = StandardScaler()
@@ -29,7 +38,7 @@ Y = dataset["LikedOrDisliked"]
 # X_train = scaler.transform(X_train)
 # X_test = scaler.transform(X_test)
 
-# mlp = MLPClassifier(hidden_layer_sizes=(1000,1000,1000),max_iter=500)
+# mlp = MLPClassifier(hidden_layer_sizes=(100,200,100),max_iter=600)
 # mlp.fit(X_train,y_train)
 
 # predictions = mlp.predict(X_test)
@@ -38,12 +47,13 @@ Y = dataset["LikedOrDisliked"]
 # print accuracy_score(y_test,predictions)
 
 ## Decision Tree implementation
+# pdb.set_trace()
 X_train, X_test, y_train, y_test = train_test_split( X, Y, test_size = 0.3)
 
-clf_gini = DecisionTreeClassifier(criterion = "gini", max_depth=10, min_samples_leaf=5)
+clf_gini = DecisionTreeClassifier(criterion = "gini", max_depth=10, min_samples_leaf=2)
 clf_gini.fit(X_train, y_train)
 
-clf_entropy = DecisionTreeClassifier(criterion = "entropy", max_depth=10, min_samples_leaf=5)
+clf_entropy = DecisionTreeClassifier(criterion = "entropy", max_depth=10, min_samples_leaf=2)
 clf_entropy.fit(X_train, y_train)
 
 pred_gini = clf_gini.predict(X_test)
@@ -52,31 +62,9 @@ pred_entropy = clf_entropy.predict(X_test)
 print accuracy_score(y_test,pred_gini)
 print accuracy_score(y_test,pred_entropy)
 
-tree.export_graphviz(clf_entropy,out_file='tree_en.dot')
-tree.export_graphviz(clf_gini,out_file='tree_gini.dot')
-
-# X = dataset[:,0:20]
-# Y = dataset[:,20]
-
-# pdb.set_trace()
-# #Creating model for network usig Keras
-# model = Sequential()
-# model.add(Dense(12, input_dim=7, activation='relu'))
-# # model.add(Dense(8, activation='relu'))
-# model.add(Dense(1, activation='sigmoid'))
-
-# model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+doten = tree.export_graphviz(clf_entropy,out_file='tree_en.dot',feature_names=df2,filled=True,rounded=True)
+dotgini = tree.export_graphviz(clf_gini,out_file='tree_gini.dot',feature_names=df2,filled=True,rounded=True)
 
 
-# model.fit(X, Y, epochs=10, batch_size=10)
-# pdb.set_trace()
-# scores = model.evaluate(X, Y)
-# print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-
-# def train():
-# 	pass
-
-# def test():
-# 	pass
 
