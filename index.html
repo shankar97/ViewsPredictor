@@ -18,10 +18,34 @@
 
     <section class="main-content">
       <h1>Abstract</h1>
-      <p>Here is an abstract to our project, we are working on some great stuff, stay tuned</p>
+      <p>Here is an abstract to our project, we have collected data using kaggle and the YouTube API to generate information about basic features of a video including its Likes, Dislikes, category, Channel Sibscriber Count, View Count and Average of likes to dislikes. Using the data obtained we have run decision tree models on the dataset just containing Rounded Likes, Rounded View count, subscriber count and category ID. Using this information we have obtained information about the "popularity" of the video with respect to being able to get an understanding of how the likes to dislikes ratio varies for the videos. The dataset being used is comprised of 8650 examples.</p>
+
+      <p>The following decision trees were obtained on running the model made using python libraries of scikit-learn. Note: before preparing this model, the dataset was explored on Weka to find the distribution of the attributes and it was seen that a ZeroR model obtained an accuracy of ~55%.</p>
+
+      <!-- Trigger the Modal -->
+      <img id="myImg" src="TreeClassification/tree.png" alt="Information Gain Entropy Decision Tree">
+      <!-- The Modal -->
+      <div id="myModal" class="modal">
+        <!-- The Close Button -->
+        <span class="close">&times;</span>
+        <!-- Modal Content (The Image) -->
+        <img class="modal-content" id="img01" src="TreeClassification/tree.png">
+        <!-- Modal Caption (Image Text) -->
+        <div id="caption">Information Gain Entropy Decision Tree</div>
+      </div>
+      <p class="img-title">Information Gain Entropy Decision Tree</p>
+
+
+      <br>
+
+      <!-- Trigger the Modal -->
+      <img id="myImg2" src="TreeClassification/treeg.png" alt="Gini Index Decision Tree">
+      <p class="img-title">Gini Index Decision Tree</p>
+
+      <p>For the above trees, the dataset used was split into test and training sets. A 70-30 set was taken into consideration, so here 70% of the dataset was used for training and 30% of the data was used for testing. The gini index criterion used obtained an accuracy of ~84% and information gain criterion on the decision tree gained an accuracy of ~80%. </p>
 
       <h1>Final Project Report</h1>
-      <p>Our final project report can be viewed <a href="">here</a></p>
+      <p>Our final project report can be viewed <a href="#">here</a></p>
 
       <footer class="site-footer">
         <span class="site-footer-owner">The project page has been maintained by <a href="#">George Malty</a> and <a href="#">Shankar Dutt Salwan (Shanks)</a></span>
@@ -31,5 +55,26 @@
 
     </section>
 
+    <script type="text/javascript">
+      var modal = document.getElementById('myModal');
+
+      // Get the image and insert it inside the modal - use its "alt" text as a caption
+      var img = document.getElementById('myImg');
+      var modalImg = document.getElementById("img01");
+      var captionText = document.getElementById("caption");
+      img.onclick = function(){
+          modal.style.display = "block";
+          modalImg.src = this.src;
+          captionText.innerHTML = this.alt;
+      }
+
+      // Get the <span> element that closes the modal
+      var span = document.getElementsByClassName("close")[0];
+
+      // When the user clicks on <span> (x), close the modal
+      span.onclick = function() { 
+        modal.style.display = "none";
+      }
+    </script>
   </body>
 </html>
