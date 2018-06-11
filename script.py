@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn import tree
 import graphviz
 
@@ -31,20 +31,20 @@ X = dataset.drop("LikedOrDisliked",axis = 1)
 Y = dataset["LikedOrDisliked"]
 
 ## MLP implmented using 100 layers
-# X_train, X_test, y_train, y_test = train_test_split(X, Y)
-# # pdb.set_trace()
-# scaler = StandardScaler()
-# scaler.fit(X_train)
-# X_train = scaler.transform(X_train)
-# X_test = scaler.transform(X_test)
+X_train, X_test, y_train, y_test = train_test_split(X, Y)
+# pdb.set_trace()
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
 
-# mlp = MLPClassifier(hidden_layer_sizes=(100,200,100),max_iter=600)
-# mlp.fit(X_train,y_train)
+mlp = MLPClassifier(hidden_layer_sizes=(100,200,100),max_iter=600)
+mlp.fit(X_train,y_train)
 
-# predictions = mlp.predict(X_test)
+predictions = mlp.predict(X_test)
 
-# print(classification_report(y_test,predictions))
-# print accuracy_score(y_test,predictions)
+print(classification_report(y_test,predictions))
+print "MLP accuracy using 100 hidden layers: " + str(accuracy_score(y_test,predictions)*100)
 
 ## Decision Tree implementation
 # pdb.set_trace()
@@ -56,11 +56,16 @@ clf_gini.fit(X_train, y_train)
 clf_entropy = DecisionTreeClassifier(criterion = "entropy", max_depth=10, min_samples_leaf=2)
 clf_entropy.fit(X_train, y_train)
 
+# # regs = DecisionTreeRegressor(max_depth = 5)
+# regs.fit(X_train,y_train)
+
 pred_gini = clf_gini.predict(X_test)
 pred_entropy = clf_entropy.predict(X_test)
+# pred_reg = regs.predict(X_test)
 
-print accuracy_score(y_test,pred_gini)
-print accuracy_score(y_test,pred_entropy)
+print "Tree Accuracy Using gini index: " + str(accuracy_score(y_test,pred_gini)*100)
+print "Tree Accuracy Using info gain: " + str(accuracy_score(y_test,pred_entropy)*100)
+# print accuracy_score(y_test,pred_reg)
 
 doten = tree.export_graphviz(clf_entropy,out_file='tree_en.dot',feature_names=df2,filled=True,rounded=True)
 dotgini = tree.export_graphviz(clf_gini,out_file='tree_gini.dot',feature_names=df2,filled=True,rounded=True)
