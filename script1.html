@@ -1,0 +1,361 @@
+
+<html><head><title>Google APIs - Sample JS Page</title></head>
+<body>
+
+<script>
+
+  /***** START BOILERPLATE CODE: Load client library, authorize user. *****/
+
+  // Global variables for GoogleAuth object, auth status.
+  var GoogleAuth;
+
+    
+    var allNames = ["PewDiePie", "tseries","kidrauhl","JustinBieberVevo","Holasoygerman","canalkondzilla","edsheeran","corycotton","taylorswift","katyperry","rihanna","elrubiusomg","whinderssonnunes","eminemmusic","taylorswiftvevo","fernanfloo","onedirectionchannel", "YouTube", "katyperryvevo", "eminemvevo","rihannavevo", "wwe", "juegagerman","TheEllenShow","SETIndia","onedirectionvevo","arianaGrande","smosh","vanossgaming","vegetta777","spinnin'records","yuya","felipeneto","brunomars","shakira","nigahiga","markiplier","5-minuteCrafts","trapNation","luisfonsioficial","shakiravevo","arianagrandevevo","jacksepticeye","luisfonsivevo","dantdm","ksi","selenagomez","jennamarbles","getmovies","skrillex","loganpaulvlogs","davidguetta","watchmojo.com","adele","fbe","chuchuTVNurseryRhymes&KidsSongs","enchufetv","rezendeevil","zeemusiccompany","maroon5","vevo","thetonightshowstarringjimmyfallon","canalcanalha","adelevevo","maluma","nocopyrightsounds","JBalvin","buzzfeedvideo","selenagomezvevo","maroon5vevo","werevertumorro","ozuna","luisitocomunica","malumavevo","luccasneto","ptxofficial","nickuminaj","jakepaul","enriqueiglesias","wizkhalifa","thechainsmokers","workpointofficial","romanatwoodvlogs","lizakoshy","popularmmos","smtown","marshmello","daddyyankee","portadosfundos","erb"];
+    
+    var allVideoIdsList = [];
+    
+  /**
+   * Load the API's client and auth2 modules.
+   * Call the initClient function after the modules load.
+   */
+  function handleClientLoad() {
+    gapi.load('client:auth2', initClient);
+  }
+
+  function initClient() {
+    // Initialize the gapi.client object, which app uses to make API requests.
+    // Get API key and client ID from API Console.
+    // 'scope' field specifies space-delimited list of access scopes
+
+    gapi.client.init({
+        'clientId': 'ENTER_CLIENT_ID',
+        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+        'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'
+    }).then(function () {
+      GoogleAuth = gapi.auth2.getAuthInstance();
+
+      // Listen for sign-in state changes.
+      GoogleAuth.isSignedIn.listen(updateSigninStatus);
+
+      // Handle initial sign-in state. (Determine if user is already signed in.)
+      setSigninStatus();
+
+      // Call handleAuthClick function when user clicks on "Authorize" button.
+      $('#execute-request-button').click(function() {
+        handleAuthClick(event);
+      }); 
+    });
+  }
+
+  function handleAuthClick(event) {
+    // Sign user in after click on auth button.
+    GoogleAuth.signIn();
+  }
+
+  function setSigninStatus() {
+    var user = GoogleAuth.currentUser.get();
+    isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
+    // Toggle button text and displayed statement based on current auth status.
+    if (isAuthorized) {
+      defineRequest();
+    }
+  }
+
+  function updateSigninStatus(isSignedIn) {
+    setSigninStatus();
+  }
+
+  function createResource(properties) {
+    var resource = {};
+    var normalizedProps = properties;
+    for (var p in properties) {
+      var value = properties[p];
+      if (p && p.substr(-2, 2) == '[]') {
+        var adjustedName = p.replace('[]', '');
+        if (value) {
+          normalizedProps[adjustedName] = value.split(',');
+        }
+        delete normalizedProps[p];
+      }
+    }
+    for (var p in normalizedProps) {
+      // Leave properties that don't have values out of inserted resource.
+      if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) {
+        var propArray = p.split('.');
+        var ref = resource;
+        for (var pa = 0; pa < propArray.length; pa++) {
+          var key = propArray[pa];
+          if (pa == propArray.length - 1) {
+            ref[key] = normalizedProps[p];
+          } else {
+            ref = ref[key] = ref[key] || {};
+          }
+        }
+      };
+    }
+    return resource;
+  }
+
+  function removeEmptyParams(params) {
+    for (var p in params) {
+      if (!params[p] || params[p] == 'undefined') {
+        delete params[p];
+      }
+    }
+    return params;
+  }
+
+    //latest attempt:
+    var currentChannel;
+    var currentVideoInList;
+    var allTheData = [];
+    var currentPlaylistResponse;
+    var lastVideoViews;
+    var lastVideoLikes;
+    var lastVideoDislikes;
+    var lastVideoComments;
+    var totalLikes;
+    var totalViews;
+    var totalDislikes;
+    var currTotalSubCount;
+    
+    var currentVideo;
+    
+    
+    var allViews = [];
+        var allDislikes = [];
+        var allLikes = [];
+        var allCategories = [];
+    channelIndex = 0;
+    
+    var allResponses = [];
+    var allResponseText = "";
+    var csvArrays = [];
+    
+    
+  function executeRequest(request) {
+    request.execute(function(response) {
+        //console.log(response);
+        if(response.items[0] != null){
+        currTotalSubCount = response.items[0].statistics.subscriberCount;
+        buildApiRequest2('GET',
+                '/youtube/v3/playlistItems',
+                {
+                 'maxResults': '50',
+                 'part': 'contentDetails','playlistId': response.items[0].contentDetails.relatedPlaylists.uploads},response.items[0].statistics.subscriberCount);
+        }else{
+            console.log(allNames[currentChannel]);
+            currentChannel++;
+            if(currentChannel < allNames.length){
+                buildApiRequest('GET',
+                                '/youtube/v3/channels',
+                                {'forUsername': allNames[currentChannel],
+                                 'maxResults': '1',
+                                 'part': 'statistics,contentDetails'},allNames[currentChannel]);
+            }
+        }
+        //allResponses.push(channelName + "," + response.items[0].id);
+        //allResponseText = allResponseText + "," + response.items[0].id;
+        
+    });
+  }
+    
+  function executeRequest3(request, channelI) {
+        
+    request.execute(function(response) {
+        if(currentVideoInList != 0){
+            var likedOrNot = "Disliked";
+            if (Math.round(response.items[0].statistics.likeCount/response.items[0].statistics.dislikeCount) >= 40){
+                likedOrNot = "Liked";
+            }
+            allTheData.push(
+                [currTotalSubCount, 
+                 response.items[0].snippet.categoryId, 
+                 Math.round(totalViews / (currentVideoInList + 1)), 
+                 50000 * Math.round(totalViews / (currentVideoInList + 1) / 50000), 
+                 Math.round(totalLikes / (currentVideoInList + 1)), 
+                 500 * Math.round(totalLikes / (currentVideoInList + 1) / 500), 
+                 Math.round(totalDislikes / (currentVideoInList + 1)), 
+                 500 * Math.round(totalDislikes / (currentVideoInList + 1) / 500), 
+                 lastVideoViews, 
+                 50000 * Math.round(lastVideoViews/50000), 
+                 lastVideoLikes,
+                 500*Math.round(lastVideoLikes/500), 
+                 lastVideoDislikes,
+                 500 * Math.round(lastVideoDislikes/500), 
+                 lastVideoComments, 
+                 parseInt(response.items[0].statistics.likeCount),
+                 500 * Math.round(parseInt(response.items[0].statistics.likeCount)/500), 
+                 parseInt(response.items[0].statistics.dislikeCount),
+                 500 * Math.round(parseInt(response.items[0].statistics.dislikeCount)/500),
+                 Math.round(response.items[0].statistics.likeCount/response.items[0].statistics.dislikeCount),
+                 likedOrNot,
+                 parseInt(response.items[0].statistics.viewCount),
+                 50000 * Math.round(response.items[0].statistics.viewCount/500)]);
+        }
+        currentVideoInList++;
+        if(currentPlaylistResponse.items[currentVideoInList] != null){
+            buildApiRequest3('GET',
+                '/youtube/v3/videos',
+                {'id': currentPlaylistResponse.items[currentVideoInList].contentDetails.videoId,
+                 'part': 'snippet,statistics'}, currentChannel);
+        }else{
+            currentChannel++;
+            if(currentChannel < allNames.length){
+                buildApiRequest('GET',
+                '/youtube/v3/channels',
+                {'forUsername': allNames[currentChannel],
+                 'maxResults': '1',
+                 'part': 'statistics,contentDetails'},allNames[currentChannel]);
+            }
+        }
+        totalViews += parseInt(response.items[0].statistics.viewCount);
+        totalLikes += parseInt(response.items[0].statistics.likeCount);
+        totalDislikes += parseInt(response.items[0].statistics.dislikeCount);
+        lastVideoComments = parseInt(response.items[0].statistics.commentCount);
+        lastVideoViews = parseInt(response.items[0].statistics.viewCount);
+        lastVideoLikes = parseInt(response.items[0].statistics.likeCount);
+        lastVideoDislikes = parseInt(response.items[0].statistics.dislikeCount);
+    });
+       
+  }
+    
+    var finalCSV = [];
+    var finalCSVFile = "";
+    
+    function calcFinalCSV(){
+        finalCSVFile = "data:text/csv;charset=utf-8,SubCount,Category,AvgViews,AvgViewsRounded,AvgLikes,AvgLikesRounded,AvgDislikes,AvgDislikesRounded,LastViews,LastViewsRounded,LastLikes,LastLikesRounded,LastDislikes,LastDislikesRounded,LastComments,LikeCount,LikeCountRounded,DislikeCount,DislikeCountRounded,LikeDislikeRatio,LikedOrDisliked,ViewCount,ViewCountRounded\n"
+        for(var i = 0; i < allTheData.length - 1; i++){
+            for(var j = 0; j < allTheData[i].length - 1; j++){
+                finalCSVFile += allTheData[i][j] + ",";
+            }
+            finalCSVFile += allTheData[i][allTheData[i].length - 1] + "\n";
+        }
+        for(var j = 0; j < allTheData[i].length - 1; j++){
+                finalCSVFile += allTheData[allTheData.length - 1][j] + ",";
+        }
+        finalCSVFile += allTheData[allTheData.length - 1][allTheData[i].length - 1] + "\n";
+        var encodedUri = encodeURI(finalCSVFile);
+        window.open(encodedUri);
+        
+    }
+    
+    function executeRequest2(request, subscriberCount) {
+    request.execute(function(response) {
+        currentPlaylistResponse = response;
+        currentVideoInList = 0;
+        totalLikes = 0;
+        totalDislikes = 0;
+        totalViews = 0;
+        if(currentPlaylistResponse.items != null && currentPlaylistResponse.items[0] != null){
+            buildApiRequest3('GET',
+                '/youtube/v3/videos',
+                {'id': currentPlaylistResponse.items[currentVideoInList].contentDetails.videoId,
+                 'part': 'snippet,statistics'}, currentChannel);
+        }*/
+    });
+  }
+
+
+    function buildApiRequest3(requestMethod, path, params, properties) {
+    params = removeEmptyParams(params);
+    var request;
+    if (properties) {
+      var resource = createResource(properties);
+      request = gapi.client.request({
+          'body': resource,
+          'method': requestMethod,
+          'path': path,
+          'params': params
+      });
+    } else {
+      request = gapi.client.request({
+          'method': requestMethod,
+          'path': path,
+          'params': params
+      });
+    }
+      //console.log(properties);
+    return executeRequest3(request, properties);
+  }
+    
+    
+    function buildApiRequest2(requestMethod, path, params, properties) {
+    params = removeEmptyParams(params);
+    var request;
+    if (properties) {
+      var resource = createResource(properties);
+      request = gapi.client.request({
+          'body': resource,
+          'method': requestMethod,
+          'path': path,
+          'params': params
+      });
+    } else {
+      request = gapi.client.request({
+          'method': requestMethod,
+          'path': path,
+          'params': params
+      });
+    }
+      //console.log(properties);
+    executeRequest2(request, properties);
+  }
+    
+  function buildApiRequest(requestMethod, path, params, properties) {
+    params = removeEmptyParams(params);
+    var request;
+    if (properties) {
+      var resource = createResource(properties);
+      request = gapi.client.request({
+          'body': resource,
+          'method': requestMethod,
+          'path': path,
+          'params': params
+      });
+    } else {
+      request = gapi.client.request({
+          'method': requestMethod,
+          'path': path,
+          'params': params
+      });
+    }
+      //console.log(properties);
+      //console.log(properties);
+    executeRequest(request);
+  }
+
+  /***** END BOILERPLATE CODE *****/
+
+    
+    
+  
+  function defineRequest() {
+    // See full sample for buildApiRequest() code, which is not 
+// specific to a particular API or API method.
+
+      /*for(var  i = 0; i<allNames.length; i++){
+buildApiRequest('GET',
+                '/youtube/v3/channels',
+                {'forUsername': allNames[i],
+                 'maxResults': '1',
+                 'part': 'statistics,contentDetails'},allNames[i]);}*/
+      //currentChannel = 0;
+      buildApiRequest('GET',
+                '/youtube/v3/channels',
+                {'forUsername': allNames[currentChannel],
+                 'maxResults': '1',
+                 'part': 'statistics,contentDetails'},allNames[currentChannel]);
+  }
+    
+    
+</script>
+
+<button id="execute-request-button">Authorize</button>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script async defer src="https://apis.google.com/js/api.js" 
+        onload="this.onload=function(){};handleClientLoad()" 
+        onreadystatechange="if (this.readyState === 'complete') this.onload()">
+</script>
+</body></html>

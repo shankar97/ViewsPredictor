@@ -19,11 +19,12 @@
 
     <section class="main-content">
       <h1>Abstract</h1>
-      <p>This project uses machine learning to classify videos by their popularity based on attributed data of the video. We have collected data using kaggle and the YouTube API to generate information about basic features of a video including its Likes, Dislikes, category, Channel Sibscriber Count, View Count and Average of likes to dislikes. Using the data obtained we have run decision tree models on the dataset just containing Rounded Likes, Rounded View count, subscriber count and category ID. Using this information we have obtained information about the "popularity" of the video with respect to being able to get an understanding of how the likes to dislikes ratio varies for the videos. The dataset being used is comprised of 8650 examples.</p>
+      <p>This project uses machine learning to classify videos by their popularity based on attributed data of the video. We have collected data using kaggle and the YouTube API to generate information about basic features of a video including its Likes, Dislikes, category, Channel Subscriber Count, View Count and Ratio of likes to dislikes. Using the data obtained we have run decision tree models on the dataset just containing Rounded Likes, Rounded View count, subscriber count and category ID. Using this information we have obtained information about the "popularity" of the video with respect to being able to get an understanding of how the likes to dislikes ratio varies for the videos. The dataset being used is comprised of 8650 examples.</p>
 
       <p>The following decision trees were obtained on running the model made using python libraries of scikit-learn. Note: before preparing this model, the dataset was explored on Weka to find the distribution of the attributes and it was seen that a ZeroR model obtained an accuracy of ~55%.</p>
 
-      <!-- <img src="https://viewpredml.imgix.net/tree.png" data-zoom="https://viewpredml.imgix.net/tree.png"> -->
+      <!-- <img class="demo-trigger" src="https://mlvpred.imgix.net/treeg.png" data-zoom="https://mlvpred.imgix.net/treeg.png">
+      <div class="detail"></div> -->
       <!-- Trigger the Modal -->
       <img id="myImg" src="TreeClassification/tree.png" alt="Information Gain Entropy Decision Tree">
       <!-- The Modal -->
